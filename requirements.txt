@@ -1,0 +1,13 @@
+tensorflow
+torch
+matplotlib
+numpy
+streamlit
+kaggle
+kagglehub
+transformers
+ipykernel
+tf-keras
+pandas 
+scikit-learn
+seaborn

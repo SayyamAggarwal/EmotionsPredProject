@@ -8,15 +8,13 @@ from PIL import Image
 import os
 import gdown  # pip install gdown
 
-# ---------------------------
-# Download model if not present
-# ---------------------------
 MODEL_PATH = "google-finetuned_ViT-model.keras"
-GOOGLE_DRIVE_URL = "https://drive.google.com/file/d/13tHkfWYlv9VV8Q6NJB-EL8xy-YTAkJw8"  # replace with your file ID
+
+file_id = "13tHkfWYlv9VV8Q6NJB-EL8xy-YTAkJw8"
 
 if not os.path.exists(MODEL_PATH):
     st.info("Downloading model from Google Drive...")
-    gdown.download(GOOGLE_DRIVE_URL, MODEL_PATH, quiet=False)
+    gdown.download(f"https://drive.google.com/uc?id={file_id}", MODEL_PATH, quiet=False)
     st.success("Model downloaded!")
 
 # ---------------------------

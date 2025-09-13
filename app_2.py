@@ -6,19 +6,22 @@ from tensorflow.keras.models import load_model
 from transformers import TFViTModel
 from PIL import Image
 import os
-import gdown  # pip install gdown
-
-MODEL_PATH = "google-finetuned_ViT-model.keras"
-
-file_id = "13tHkfWYlv9VV8Q6NJB-EL8xy-YTAkJw8"
-
-if not os.path.exists(MODEL_PATH):
-    st.info("Downloading model from Google Drive...")
-    gdown.download(f"https://drive.google.com/uc?id={file_id}", MODEL_PATH, quiet=False)
-    st.success("Model downloaded!")
+import datetime
 
 # ---------------------------
-# Custom ViT layer (same as training)
+# Model path and classes
+# ---------------------------
+MODEL_PATH = "google-finetuned_ViT-model.keras"  # Make sure this exists locally
+CLASS_NAMES = ["happy", "angry", "sad"]
+
+# ---------------------------
+# Directory to save uploaded images
+# ---------------------------
+SAVE_DIR = "uploaded_images"
+os.makedirs(SAVE_DIR, exist_ok=True)
+
+# ---------------------------
+# Custom ViT layer
 # ---------------------------
 class ViTCLSExtractor(Layer):
     def __init__(self, model_name="google/vit-base-patch16-224-in21k", **kwargs):
@@ -35,19 +38,30 @@ class ViTCLSExtractor(Layer):
 # ---------------------------
 model = load_model(MODEL_PATH, custom_objects={'ViTCLSExtractor': ViTCLSExtractor})
 
-CLASS_NAMES = ["happy", "angry", "sad"]
-
 # ---------------------------
 # Streamlit UI
 # ---------------------------
 st.title("😊 Emotion Detection (Happy / Angry / Sad)")
 
-uploaded_file = st.file_uploader("Upload an image", type=["jpg","jpeg","png"])
+uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+
 if uploaded_file:
+    # Open image
     image = Image.open(uploaded_file).convert("RGB").resize((256, 256))
     st.image(image, caption="Uploaded Image", use_container_width=True)
 
-    # Preprocess
+    # ---------------------------
+    # Save uploaded image
+    # ---------------------------
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{timestamp}_{uploaded_file.name}"
+    save_path = os.path.join(SAVE_DIR, filename)
+    image.save(save_path)
+    st.success(f"Image saved at: {save_path}")
+
+    # ---------------------------
+    # Preprocess for prediction
+    # ---------------------------
     img_array = np.array(image) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
@@ -60,11 +74,11 @@ if uploaded_file:
     st.markdown(f"### Predicted Emotion: **{pred_class}** ({confidence:.2f}%)")
 
     # Emoji + message
-    emojis = {"happy":"😀","angry":"😡","sad":"😢"}
+    emojis = {"happy": "😀", "angry": "😡", "sad": "😢"}
     boosters = {
-        "happy":"Keep shining! 🌞",
-        "angry":"Relax, breathe, you got this 🧘",
-        "sad":"Cheer up! Better days are ahead 💪"
+        "happy": "Keep shining! 🌞",
+        "angry": "Relax, breathe, you got this 🧘",
+        "sad": "Cheer up! Better days are ahead 💪"
     }
     st.markdown(f"{emojis[pred_class]} {boosters[pred_class]}")
 

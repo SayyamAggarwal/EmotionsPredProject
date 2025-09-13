@@ -57,11 +57,8 @@ if uploaded_file:
     filename = f"{timestamp}_{uploaded_file.name}"
     save_path = os.path.join(SAVE_DIR, filename)
     image.save(save_path)
-    st.success(f"Image saved at: {save_path}")
+    # st.success(f"Image saved at: {save_path}")
 
-    # ---------------------------
-    # Preprocess for prediction
-    # ---------------------------
     img_array = np.array(image) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 

@@ -7,3 +7,4 @@ kaggle.json
 *.pkl
 wandb/
 
+uploaded_images/

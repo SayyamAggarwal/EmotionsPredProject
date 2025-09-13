@@ -8,21 +8,14 @@ from PIL import Image
 import os
 import datetime
 
-# ---------------------------
-# Model path and classes
-# ---------------------------
-MODEL_PATH = "google-finetuned_ViT-model.keras"  # Make sure this exists locally
+
+MODEL_PATH = "google-finetuned_ViT-model.keras"  # Ensure this exists locally
 CLASS_NAMES = ["happy", "angry", "sad"]
 
-# ---------------------------
-# Directory to save uploaded images
-# ---------------------------
+
 SAVE_DIR = "uploaded_images"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
-# ---------------------------
-# Custom ViT layer
-# ---------------------------
 class ViTCLSExtractor(Layer):
     def __init__(self, model_name="google/vit-base-patch16-224-in21k", **kwargs):
         super().__init__(**kwargs)
@@ -33,32 +26,40 @@ class ViTCLSExtractor(Layer):
         cls_token = outputs.last_hidden_state[:, 0, :]  # take [CLS] token
         return cls_token
 
-# ---------------------------
-# Load model
-# ---------------------------
+
 model = load_model(MODEL_PATH, custom_objects={'ViTCLSExtractor': ViTCLSExtractor})
 
-# ---------------------------
-# Streamlit UI
-# ---------------------------
-st.title("😊 Emotion Detection (Happy / Angry / Sad)")
+st.title("😊 Real-Time Emotion Detection (Happy / Angry / Sad)")
 
 uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
-if uploaded_file:
-    # Open image
-    image = Image.open(uploaded_file).convert("RGB").resize((256, 256))
-    st.image(image, caption="Uploaded Image", use_container_width=True)
 
-    # ---------------------------
-    # Save uploaded image
-    # ---------------------------
+camera_image = st.camera_input("Or take a photo using your webcam")
+
+# Choose image from either input
+if uploaded_file:
+    image = Image.open(uploaded_file).convert("RGB")
+    source_name = uploaded_file.name
+elif camera_image:
+    image = Image.open(camera_image).convert("RGB")
+    source_name = "camera_image.png"
+else:
+    image = None
+
+# Process the image if present
+if image:
+    # Resize for model
+    image = image.resize((256, 256))
+    st.image(image, caption="Input Image", use_container_width=True)
+
+
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{timestamp}_{uploaded_file.name}"
+    filename = f"{timestamp}_{source_name}"
     save_path = os.path.join(SAVE_DIR, filename)
     image.save(save_path)
-    # st.success(f"Image saved at: {save_path}")
+    st.success(f"Image saved at: {save_path}")
 
+   
     img_array = np.array(image) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 

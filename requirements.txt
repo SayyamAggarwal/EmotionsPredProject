@@ -11,3 +11,5 @@ tf-keras
 pandas 
 scikit-learn
 seaborn
+opencv-python
+wandb

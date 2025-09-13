@@ -2,9 +2,8 @@ human-emotions-datasethes.zip
 kaggle.json
 \HumanEmoNew
 /HumanEmoNew
-
-
 *.h5
 *.keras
 *.pkl
+wandb/
 
